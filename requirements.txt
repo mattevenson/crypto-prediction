@@ -1,0 +1,6 @@
+requests
+pandas
+pytrends
+matplotlib
+numpy
+finta
