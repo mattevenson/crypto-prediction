@@ -1,0 +1,1 @@
+{"exp_name": "sine_wave", "num_epochs": 2000, "learning_rate": 0.0001, "batch_size": 128, "sequence_length": 10, "max_to_keep": 5, "test_size": 0.25, "num_inputs": 1, "num_outputs": 1, "rnn_units": [40, 40, 40, 40, 40]}
