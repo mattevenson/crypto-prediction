@@ -1,5 +1,5 @@
 from base.base_train import BaseTrain
-from tqdm import tqdm
+from tqdm import tqdm_notebook
 import numpy as np
 
 class Trainer(BaseTrain):
@@ -7,7 +7,7 @@ class Trainer(BaseTrain):
         super(Trainer, self).__init__(sess, model, data, config, logger)
 
     def train_epoch(self):
-        loop = tqdm(range(self.data.num_iter_per_epoch))
+        loop = tqdm_notebook(range(self.data.num_iter_per_epoch))
 
         for _ in loop:
             self.train_step()
