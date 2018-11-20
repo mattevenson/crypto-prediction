@@ -12,8 +12,8 @@ class Trainer(BaseTrain):
         for _ in loop:
             self.train_step()
 
-        train_loss = self.sess.run([self.model.mean_squared_error], feed_dict={self.model.X: self.data.X_train, self.model.Y: self.data.Y_train})
-        test_loss = self.sess.run([self.model.mean_squared_error], feed_dict={self.model.X: self.data.X_test, self.model.Y: self.data.Y_test})
+        train_loss = self.sess.run([self.model.loss], feed_dict={self.model.X: self.data.X_train, self.model.Y: self.data.Y_train})
+        test_loss = self.sess.run([self.model.loss], feed_dict={self.model.X: self.data.X_test, self.model.Y: self.data.Y_test})
 
         cur_it = self.model.global_step_tensor.eval(self.sess)
 

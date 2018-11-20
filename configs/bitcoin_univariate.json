@@ -1,1 +1,1 @@
-{"exp_name": "bitcoin_univariate", "num_epochs": 2000, "learning_rate": 0.0001, "batch_size": 100, "sequence_length": 8, "max_to_keep": 5, "test_size": 0.3, "num_inputs": 1, "num_outputs": 1, "rnn_units": [40, 40, 40, 40, 40]}
+{"exp_name": "bitcoin_univariate", "num_epochs": 2000, "learning_rate": 0.0001, "batch_size": 64, "sequence_length": 20, "max_to_keep": 5, "test_size": 0.2, "num_inputs": 1, "num_outputs": 1, "rnn_units": [40, 40, 40], "lambda_l2_reg": 0.005}
