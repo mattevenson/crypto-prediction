@@ -1,0 +1,1 @@
+{"exp_name": "bitcoin", "num_epochs": 2000, "learning_rate": 1e-05, "batch_size": 64, "sequence_length": 6, "max_to_keep": 5, "test_size": 0.2, "num_inputs": 15, "num_outputs": 1, "rnn_units": [20, 20], "lambda_l2_reg": 0.001, "E": 10, "E_prime": 30, "hidden_units": 20}

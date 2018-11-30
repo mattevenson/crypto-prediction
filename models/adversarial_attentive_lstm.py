@@ -1,9 +1,9 @@
 from base.base_model import BaseModel
 import tensorflow as tf
 
-class LSTMModel(BaseModel):
+class AdvLSTMModel(BaseModel):
     def __init__(self, config):
-        super(LSTMModel, self).__init__(config)
+        super(AdvLSTMModel, self).__init__(config)
 
         self.build_model()
         self.init_saver()
@@ -12,19 +12,25 @@ class LSTMModel(BaseModel):
         self.X = tf.placeholder(tf.float32, [None, self.config.sequence_length, self.config.num_inputs])
         self.Y = tf.placeholder(tf.float32, [None, self.config.num_outputs])
 
-        self.x = tf.unstack(self.X, self.config.sequence_length, axis=1)
+        # x = tf.unstack(self.X, self.config.sequence_length, axis=1)
 
-        lstm_cells = []
+        m = tf.layers.dense(self.X, self.config.E, activation=tf.math.tanh)
 
-        for u in self.config.rnn_units:
-            lstm_cell = tf.contrib.rnn.LSTMBlockCell(u)
-            lstm_cells.append(lstm_cell)
+        m_unstacked = tf.unstack(m, self.config.sequence_length, axis=1)
 
-        stacked_lstm = tf.contrib.rnn.MultiRNNCell(lstm_cells)
+        lstm = tf.contrib.rnn.LSTMBlockCell(self.config.hidden_units)
 
-        rnn_outputs, rnn_states = tf.contrib.rnn.static_rnn(stacked_lstm, self.x, dtype=tf.float32)
+        h, c = tf.contrib.rnn.static_rnn(lstm, m_unstacked, dtype=tf.float32)
 
-        self.prediction = tf.layers.dense(rnn_outputs[-1], self.config.num_outputs)
+        u = tf.get_variable('u', shape=(self.config.E_prime, 1), dtype=tf.float32)
+
+        alpha_tilde = tf.matmul(tf.transpose(u), tf.layers.dense(h[-1], self.config.E_prime, activation=tf.math.tanh))
+
+        a = tf.reduce_sum(tf.multiply(h, tf.nn.softmax(alpha_tilde)))
+
+        e = tf.concat(a, h[-1][-1])
+
+        self.prediction = tf.layers.dense(e, self.config.num_outputs)
 
         with tf.name_scope("loss"):
             self.l2_regularization = self.config.lambda_l2_reg * sum(tf.nn.l2_loss(v) for v in tf.trainable_variables() if not ("Bias" or "bias" in v.name))
@@ -36,6 +42,7 @@ class LSTMModel(BaseModel):
 
             with tf.control_dependencies(update_ops):
                 self.train_step = tf.train.AdamOptimizer(self.config.learning_rate).minimize(self.loss, global_step=self.global_step_tensor)
+
 
     def init_saver(self):
         self.saver = tf.train.Saver(max_to_keep=self.config.max_to_keep)
