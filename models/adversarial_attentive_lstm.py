@@ -1,5 +1,6 @@
 from base.base_model import BaseModel
 import tensorflow as tf
+from tensorflow.contrib.rnn import LSTMBlockCell, AttentionCellWrapper
 
 class AdvLSTMModel(BaseModel):
     def __init__(self, config):
@@ -14,23 +15,16 @@ class AdvLSTMModel(BaseModel):
 
         # x = tf.unstack(self.X, self.config.sequence_length, axis=1)
 
-        m = tf.layers.dense(self.X, self.config.E, activation=tf.math.tanh)
+        dense1 = tf.layers.dense(self.X, self.config.E, activation=tf.math.tanh)
 
-        m_unstacked = tf.unstack(m, self.config.sequence_length, axis=1)
+        m = tf.unstack(dense1, self.config.sequence_length, axis=1)
 
-        lstm = tf.contrib.rnn.LSTMBlockCell(self.config.hidden_units)
+        attentive_lstm = AttentionCellWrapper(LSTMBlockCell(self.config.hidden_units), self.config.sequence_length)
+        rnn_outputs, rnn_states = tf.contrib.rnn.static_rnn(attentive_lstm, m, dtype=tf.float32)
 
-        h, c = tf.contrib.rnn.static_rnn(lstm, m_unstacked, dtype=tf.float32)
+        dense2 = tf.layers.dense(rnn_outputs[-1], self.config.num_outputs)
 
-        u = tf.get_variable('u', shape=(self.config.E_prime, 1), dtype=tf.float32)
-
-        alpha_tilde = tf.matmul(tf.transpose(u), tf.layers.dense(h[-1], self.config.E_prime, activation=tf.math.tanh))
-
-        a = tf.reduce_sum(tf.multiply(h, tf.nn.softmax(alpha_tilde)))
-
-        e = tf.concat(a, h[-1][-1])
-
-        self.prediction = tf.layers.dense(e, self.config.num_outputs)
+        self.prediction = dense2
 
         with tf.name_scope("loss"):
             self.l2_regularization = self.config.lambda_l2_reg * sum(tf.nn.l2_loss(v) for v in tf.trainable_variables() if not ("Bias" or "bias" in v.name))
